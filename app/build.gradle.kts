@@ -60,6 +60,10 @@ dependencies {
 
     implementation(libs.compose)
 
+    implementation("androidx.paging:paging-compose:3.3.6")
+
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0-alpha01")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
