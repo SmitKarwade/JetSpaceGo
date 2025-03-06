@@ -16,8 +16,6 @@ class SpaceDataSource(
             val offset = params.key ?: 0
             val response = apiService.getMissions(limit = 10, offset = offset)
 
-            Log.d("SpaceDataSource", "Response:")
-
             LoadResult.Page(
                 data = response.results,
                 prevKey = if (offset == 0) null else offset - 10,
