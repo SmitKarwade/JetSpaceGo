@@ -1,4 +1,4 @@
-package com.example.jetspacego
+package com.example.jetspacego.screens.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,11 +31,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.example.jetspacego.model.Result
 import com.example.jetspacego.paging.SpaceViewModel
+import com.example.jetspacego.screens.details.DetailsScreen
+import com.example.jetspacego.screens.profile.ProfileScreen
+import com.example.jetspacego.screens.ticket.TicketScreen
 import com.example.jetspacego.ui.theme.JetSpaceGoTheme
+import com.example.jetspacego.widgets.BottomBar
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -45,19 +53,37 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MainUI{
-                NestedMissionList()
-            }
+            MainUI()
         }
     }
 }
 
 @Composable
-fun MainUI(content: @Composable () -> Unit){
+fun MainUI(){
+    val navController = rememberNavController()
     JetSpaceGoTheme {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        Scaffold(modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                BottomBar(navController)
+            }) { innerPadding ->
             Box(modifier = Modifier.fillMaxSize().padding(innerPadding)){
-                content()
+                NavHost(navController = navController, startDestination = "main") {
+                    composable("main"){
+                        NestedMissionList(navController = navController)
+                    }
+
+                    composable("profile"){
+                        ProfileScreen(navController = navController)
+                    }
+
+                    composable("ticket"){
+                        TicketScreen(navController = navController)
+                    }
+
+                    composable("details"){
+                        DetailsScreen(navController = navController)
+                    }
+                }
             }
 
         }
@@ -66,12 +92,12 @@ fun MainUI(content: @Composable () -> Unit){
 
 
 @Composable
-fun NestedMissionList(viewModel: SpaceViewModel = hiltViewModel()) {
+fun NestedMissionList(viewModel: SpaceViewModel = hiltViewModel(), navController: NavController) {
     val launches = viewModel.launchFlow.collectAsLazyPagingItems()
 
     val missionList = List(launches.itemCount){index ->
         launches[index]
-    }
+    }.filterNotNull()
 
     val groupedMissions = missionList.groupBy { mission ->
         mission?.agencies?.get(0)?.abbrev
@@ -81,7 +107,7 @@ fun NestedMissionList(viewModel: SpaceViewModel = hiltViewModel()) {
         groupedMissions.forEach(){index, value ->
             item {
                 if (index != null && value != null) {
-                    MissionCategoryRow(index, value)
+                    MissionCategoryRow(index, value, navController = navController)
                 }
             }
         }
@@ -89,7 +115,7 @@ fun NestedMissionList(viewModel: SpaceViewModel = hiltViewModel()) {
 }
 
 @Composable
-fun MissionCategoryRow(abbrev: String, missions: List<com.example.jetspacego.model.Result?>) {
+fun MissionCategoryRow(abbrev: String, missions: List<com.example.jetspacego.model.Result?>, navController: NavController) {
     Column(modifier = Modifier.padding(8.dp)) {
         Text(
             text = abbrev,
@@ -101,7 +127,10 @@ fun MissionCategoryRow(abbrev: String, missions: List<com.example.jetspacego.mod
         LazyRow {
             items(missions) { mission ->
                 if (mission != null) {
-                    MissionCard(mission)
+                    MissionCard(mission){
+                        navController.currentBackStackEntry?.savedStateHandle?.set("msn", mission)
+                        navController.navigate("details")
+                    }
                 }
             }
         }
@@ -109,12 +138,13 @@ fun MissionCategoryRow(abbrev: String, missions: List<com.example.jetspacego.mod
 }
 
 @Composable
-fun MissionCard(mission: Result) {
+fun MissionCard(mission: Result, onItemClick : () -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .width(200.dp)
             .height(250.dp),
+        onClick = {onItemClick()},
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
