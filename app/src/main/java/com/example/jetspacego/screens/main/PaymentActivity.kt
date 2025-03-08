@@ -1,7 +1,9 @@
 package com.example.jetspacego.screens.main
 
+
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
@@ -56,11 +58,13 @@ class PaymentActivity : ComponentActivity(), PaymentResultWithDataListener {
             val navController = rememberNavController()
             viewModel = hiltViewModel()
 
-            val missionName = intent.getStringExtra("name")
-            val missionDesc = intent.getStringExtra("desc")
-            val missionImageUrl = intent.getStringExtra("url")
+            val missionName = intent.getStringExtra("name") ?: "No Name"
+            val missionDesc = intent.getStringExtra("desc") ?: "No Description"
+            val missionImageUrl = intent.getStringExtra("url") ?: "No URL"
+
 
             Surface {
+                Text(text = "PaymentActivity")
                 PaymentScreen(navController, viewModel, this, name = missionName, description = missionDesc, imageUrl = missionImageUrl)
             }
         }
@@ -70,6 +74,11 @@ class PaymentActivity : ComponentActivity(), PaymentResultWithDataListener {
         viewModel.startVerification(razorpayPaymentID ?: "", paymentData?.orderId ?: "", paymentData?.signature ?: "")
         Toast.makeText(this, "Payment Successful: $razorpayPaymentID", Toast.LENGTH_LONG).show()
 
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+
+        finish()
     }
 
 

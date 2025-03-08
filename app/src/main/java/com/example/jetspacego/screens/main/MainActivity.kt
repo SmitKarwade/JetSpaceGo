@@ -40,6 +40,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.example.jetspacego.model.Result
 import com.example.jetspacego.paging.SpaceViewModel
 import com.example.jetspacego.screens.details.DetailsScreen
+import com.example.jetspacego.screens.listbook.ListBook
 import com.example.jetspacego.screens.profile.ProfileScreen
 import com.example.jetspacego.screens.ticket.TicketScreen
 import com.example.jetspacego.ui.theme.JetSpaceGoTheme
@@ -82,6 +83,10 @@ fun MainUI(){
 
                     composable("details"){
                         DetailsScreen(navController = navController)
+                    }
+
+                    composable("listBook"){
+                        ListBook(navController = navController)
                     }
                 }
             }
