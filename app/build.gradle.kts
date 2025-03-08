@@ -5,6 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
     id("kotlin-parcelize")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -47,6 +48,9 @@ dependencies {
 //    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
 //    implementation("io.coil-kt.coil:coil-okhttp:3.0.0-rc03")
 
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
+
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
@@ -56,6 +60,14 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.hilt.android)
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.material)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.constraintlayout)
     kapt(libs.hilt.android.compiler)
 
 
@@ -67,6 +79,8 @@ dependencies {
 
     val nav_version = "2.8.8"
     implementation("androidx.navigation:navigation-compose:$nav_version")
+
+    implementation("com.razorpay:checkout:1.6.40")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
