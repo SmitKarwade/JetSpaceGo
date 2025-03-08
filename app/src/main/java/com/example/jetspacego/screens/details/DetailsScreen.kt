@@ -87,7 +87,7 @@ fun OverviewTab(result: Result, navController: NavController) {
         Box(contentAlignment = Alignment.Center) {
             OutlinedButton(onClick = {
                 navController.currentBackStackEntry?.savedStateHandle?.set("added msn", result)
-                navController.navigate("ticket")
+                navController.navigate("listBook")
             }, shape = RoundedCornerShape(10.dp), modifier = Modifier.fillMaxWidth()) {
                 Text(text = "Book a Space Flight", fontSize = 16.sp)
             }
