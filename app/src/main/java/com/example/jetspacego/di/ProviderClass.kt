@@ -1,6 +1,7 @@
 package com.example.jetspacego.di
 
 import com.example.jetspacego.constants.Constants
+import com.example.jetspacego.request.MongoService
 import com.example.jetspacego.request.SpaceService
 import dagger.Module
 import dagger.Provides
@@ -27,6 +28,17 @@ object ProviderClass {
     @Singleton
     fun provideSpaceServiceInstance(retrofit: Retrofit): SpaceService {
         return retrofit.create(SpaceService::class.java)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideMongoService(): MongoService{
+        return Retrofit.Builder()
+            .baseUrl(Constants.BASE_URL_API)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(MongoService::class.java)
     }
 
 }
