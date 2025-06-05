@@ -8,6 +8,7 @@ interface SpaceService {
     @GET("launches")
     suspend fun getMissions(
         @Query("offset") offset: Int,
-        @Query("limit") limit: Int = 10
+        @Query("limit") limit: Int = 10,
+        @Query("lsp__name") search: String?
     ): MissionResponse
 }

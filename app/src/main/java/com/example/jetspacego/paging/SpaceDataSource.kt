@@ -7,7 +7,8 @@ import com.example.jetspacego.model.launches.Results
 import com.example.jetspacego.request.SpaceService
 
 class SpaceDataSource(
-    private val apiService: SpaceService
+    private val apiService: SpaceService,
+    private val searchQuery: String?
 ) : PagingSource<Int, Results>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Results> {
@@ -15,7 +16,7 @@ class SpaceDataSource(
             Log.d("Paging", "Loading data with key: ${params.key}")
 
             val currentOffset = params.key ?: 0
-            val response = apiService.getMissions(limit = params.loadSize, offset = currentOffset)
+            val response = apiService.getMissions(limit = params.loadSize, offset = currentOffset, search = searchQuery)
             Log.d("Paging", "Received ${response.results.size} items")
 
 
