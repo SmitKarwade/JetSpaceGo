@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,7 +35,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.example.jetspacego.model.Result
+import com.example.jetspacego.model.launches.Results
 import com.example.jetspacego.paging.SpaceViewModel
 import com.example.jetspacego.screens.details.DetailsScreen
 import com.example.jetspacego.screens.listbook.ListBook
@@ -98,21 +96,35 @@ fun MainUI(){
 
 @Composable
 fun NestedMissionList(viewModel: SpaceViewModel = hiltViewModel(), navController: NavController) {
-    val launches = viewModel.launchFlow.collectAsLazyPagingItems()
+    val displayItems = viewModel.launchFlow.collectAsLazyPagingItems()
 
-    val missionList = List(launches.itemCount){index ->
-        launches[index]
-    }.filterNotNull()
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(displayItems.itemCount) { index ->
+            displayItems[index]?.let {
+                MissionCard(it) {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("msn", it)
+                    navController.navigate("details")
+                }
+            }
+        }
 
-    val groupedMissions = missionList.groupBy { mission ->
-        mission?.agencies?.get(0)?.abbrev
-    }
-
-    LazyColumn {
-        groupedMissions.forEach(){index, value ->
-            item {
-                if (index != null && value != null) {
-                    MissionCategoryRow(index, value, navController = navController)
+        displayItems.apply {
+            when {
+                loadState.refresh is androidx.paging.LoadState.Loading -> {
+                    item { Text("Refreshing...", modifier = Modifier.fillParentMaxSize().padding(16.dp)) }
+                }
+                loadState.append is androidx.paging.LoadState.Loading -> {
+                    item { Text("Loading more...", modifier = Modifier.fillMaxWidth().padding(16.dp)) }
+                }
+                loadState.refresh is androidx.paging.LoadState.Error -> {
+                    val e = loadState.refresh as androidx.paging.LoadState.Error
+                    item { Text("Error refreshing: ${e.error.localizedMessage}", modifier = Modifier.fillParentMaxSize().padding(16.dp)) }
+                }
+                loadState.append is androidx.paging.LoadState.Error -> {
+                    val e = loadState.append as androidx.paging.LoadState.Error
+                    item { Text("Error loading more: ${e.error.localizedMessage}", modifier = Modifier.fillMaxWidth().padding(16.dp)) }
                 }
             }
         }
@@ -120,68 +132,53 @@ fun NestedMissionList(viewModel: SpaceViewModel = hiltViewModel(), navController
 }
 
 @Composable
-fun MissionCategoryRow(abbrev: String, missions: List<com.example.jetspacego.model.Result?>, navController: NavController) {
-    Column(modifier = Modifier.padding(8.dp)) {
-        Text(
-            text = abbrev,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(8.dp)
-        )
-
-        LazyRow {
-            items(missions) { mission ->
-                if (mission != null) {
-                    MissionCard(mission){
-                        navController.currentBackStackEntry?.savedStateHandle?.set("msn", mission)
-                        navController.navigate("details")
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MissionCard(mission: Result, onItemClick : () -> Unit) {
+fun MissionCard(mission: Results, onItemClick : () -> Unit) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
-            .width(200.dp)
-            .height(250.dp),
+            .padding(12.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(),
         onClick = {onItemClick()},
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
-            GlideImage(
-                model = mission.image.imageUrl,
-                contentDescription = mission.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(16.dp)),
-                contentScale = ContentScale.Fit
-            )
+            mission.image?.imageUrl?.let {
+                mission.name?.let { it1 ->
+                    GlideImage(
+                        model = it,
+                        contentDescription = it1,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .clip(RoundedCornerShape(16.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = mission.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            mission.name?.let {
+                Text(
+                    text = it,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-            Text(
-                text = mission.agencies[0].name,
-                fontSize = 14.sp,
-                color = Color.Gray,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            mission.launchServiceProvider?.name?.let {
+                Text(
+                    text = it,
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
