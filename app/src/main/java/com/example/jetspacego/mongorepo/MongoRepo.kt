@@ -1,6 +1,6 @@
 package com.example.jetspacego.mongorepo
 
-import com.example.jetspacego.model.BookingDetails
+import com.example.jetspacego.model.launches.BookingDetails
 import com.example.jetspacego.request.MongoService
 import javax.inject.Inject
 

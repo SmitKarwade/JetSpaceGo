@@ -1,6 +1,6 @@
 package com.example.jetspacego.request
 
-import com.example.jetspacego.model.BookingDetails
+import com.example.jetspacego.model.launches.BookingDetails
 import com.example.jetspacego.model.paymentmodel.OrderResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
