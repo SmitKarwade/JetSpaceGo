@@ -3,7 +3,6 @@ package com.example.jetspacego.screens.listbook
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.jetspacego.model.BookingDetails
-import com.example.jetspacego.model.Result
+import com.example.jetspacego.model.launches.BookingDetails
+import com.example.jetspacego.model.launches.Results
 import com.example.jetspacego.screens.main.PaymentActivity
 import com.example.jetspacego.viewmodel.MongoViewModel
 import java.time.LocalDate
@@ -42,7 +41,7 @@ fun ListBook(navController: NavController, viewModel: MongoViewModel = hiltViewM
     var insurance by remember { mutableStateOf(false) }
     var mealType by remember { mutableStateOf("") }
 
-    val mission = navController.previousBackStackEntry?.savedStateHandle?.get<Result>("added msn")
+    val mission = navController.previousBackStackEntry?.savedStateHandle?.get<Results>("added msn")
 
     ListBookContent(
         firstName = firstName,
@@ -95,7 +94,7 @@ fun ListBook(navController: NavController, viewModel: MongoViewModel = hiltViewM
                         suitSize = suitSize,
                         insurance = insurance,
                         mealType = mealType,
-                        msnId = mission.name
+                        msnId = mission.name!!
                     )
                 }
                 if (bookingDetails != null) {
@@ -104,7 +103,7 @@ fun ListBook(navController: NavController, viewModel: MongoViewModel = hiltViewM
                 val context = navController.context
                 val intent = Intent(context, PaymentActivity::class.java).apply {
                     putExtra("name", mission?.name)
-                    putExtra("desc", mission?.description)
+                    putExtra("desc", mission?.mission?.description)
                     putExtra("url", mission?.image?.imageUrl)
                 }
                 context.startActivity(intent)
