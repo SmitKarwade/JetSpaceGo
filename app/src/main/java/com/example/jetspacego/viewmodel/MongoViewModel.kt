@@ -1,10 +1,8 @@
 package com.example.jetspacego.viewmodel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.jetspacego.model.BookingDetails
+import com.example.jetspacego.model.launches.BookingDetails
 import com.example.jetspacego.model.paymentmodel.OrderResponse
 import com.example.jetspacego.mongorepo.MongoRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
