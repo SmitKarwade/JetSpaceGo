@@ -47,6 +47,7 @@ dependencies {
 
 //    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
 //    implementation("io.coil-kt.coil:coil-okhttp:3.0.0-rc03")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-analytics")

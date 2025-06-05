@@ -6,7 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.jetspacego.model.Result
+import com.example.jetspacego.model.launches.Results
 import com.example.jetspacego.request.SpaceService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SpaceViewModel @Inject constructor(private val apiService: SpaceService) : ViewModel(){
-    val launchFlow: Flow<PagingData<Result>> = Pager(
+    val launchFlow: Flow<PagingData<Results>> = Pager(
         config = PagingConfig(pageSize = 10,
             prefetchDistance = 2,
             initialLoadSize = 10,
