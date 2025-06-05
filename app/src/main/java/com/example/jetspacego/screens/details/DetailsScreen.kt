@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -36,15 +35,15 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.jetspacego.model.Agency
-import com.example.jetspacego.model.Result
+import com.example.jetspacego.model.launches.Agencies
+import com.example.jetspacego.model.launches.Results
 
 @Composable
 fun DetailsScreen(navController: NavController) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Overview", "Agencies", "More Info")
 
-    val result : Result? = navController.previousBackStackEntry?.savedStateHandle?.get<Result>("msn")
+    val result : Results? = navController.previousBackStackEntry?.savedStateHandle?.get<Results>("msn")
 
     Column {
         TabRow(selectedTabIndex = selectedTab) {
@@ -61,20 +60,20 @@ fun DetailsScreen(navController: NavController) {
             0 -> result?.let {
                 OverviewTab(it, navController = navController)
             }
-            1 -> result?.agencies?.let { AgenciesTab(it) }
+            1 -> result?.mission?.agencies?.let { AgenciesTab(it) }
             2 -> result?.let { MoreInfoTab(it) }
         }
     }
 }
 
 @Composable
-fun OverviewTab(result: Result, navController: NavController) {
+fun OverviewTab(result: Results, navController: NavController) {
     Column(modifier = Modifier.padding(16.dp)) {
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = result.name, style = MaterialTheme.typography.titleLarge)
+        result.name?.let { Text(text = it, style = MaterialTheme.typography.titleLarge) }
         Spacer(modifier = Modifier.height(6.dp))
-        Text(text = result.description, style = MaterialTheme.typography.bodyMedium)
+        result.mission?.description?.let { Text(text = it, style = MaterialTheme.typography.bodyMedium) }
         Spacer(modifier = Modifier.height(8.dp))
 
         HorizontalDivider(modifier = Modifier.fillMaxWidth().height(1.dp))
@@ -82,7 +81,7 @@ fun OverviewTab(result: Result, navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Type", style = TextStyle(color = Color.Gray, fontSize = 14.sp))
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = "${result.type.name}")
+        Text(text = "${result.launchServiceProvider?.type?.name}")
         Spacer(modifier = Modifier.weight(1f))
         Box(contentAlignment = Alignment.Center) {
             OutlinedButton(onClick = {
@@ -97,7 +96,7 @@ fun OverviewTab(result: Result, navController: NavController) {
 }
 
 @Composable
-fun AgenciesTab(agencies: List<Agency>) {
+fun AgenciesTab(agencies: ArrayList<Agencies>) {
     LazyColumn {
         items(agencies) { agency ->
             Card(
@@ -106,10 +105,10 @@ fun AgenciesTab(agencies: List<Agency>) {
                 colors = CardDefaults.cardColors(Color.White)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = agency.name, style = MaterialTheme.typography.titleMedium)
+                    agency.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
                     Text(text = "${agency.abbrev}", fontSize = 14.sp)
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = "Type: ${agency.type.name}")
+                    Text(text = "Type: ${agency.type?.name}")
                 }
             }
         }
@@ -118,17 +117,17 @@ fun AgenciesTab(agencies: List<Agency>) {
 
 
 @Composable
-fun MoreInfoTab(result: Result) {
+fun MoreInfoTab(result: Results) {
     val context = LocalContext.current
 
     Column(modifier = Modifier.padding(16.dp)) {
 
         Spacer(modifier = Modifier.height(8.dp))
-        result.wiki_url?.let { url ->
+        result.mission?.agencies?.get(0)?.wikiUrl?.let { url ->
             ClickableLink(text = "Wikipedia", url = url)
         }
 
-        result.info_url?.let { url ->
+        result.mission?.agencies?.get(0)?.infoUrl?.let { url ->
             ClickableLink(text = "Official page", url = url)
         }
     }
