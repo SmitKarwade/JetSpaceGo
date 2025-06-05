@@ -1,4 +1,4 @@
-package com.example.jetspacego.model
+package com.example.jetspacego.model.launches
 
 import com.google.gson.annotations.SerializedName
 

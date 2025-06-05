@@ -18,7 +18,6 @@ data class Program (
     @SerializedName("agencies"        ) var agencies       : ArrayList<LaunchServiceProvider>       = arrayListOf(),
     @SerializedName("start_date"      ) var startDate      : String?                   = null,
     @SerializedName("end_date"        ) var endDate        : String?                   = null,
-    @SerializedName("mission_patches" ) var missionPatches : ArrayList<MissionPatches> = arrayListOf(),
     @SerializedName("type"            ) var type           : Type?                     = Type()
 
 ) : Parcelable

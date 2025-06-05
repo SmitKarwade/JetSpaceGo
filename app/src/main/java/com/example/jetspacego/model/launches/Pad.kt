@@ -8,7 +8,6 @@ import kotlinx.android.parcel.Parcelize
 data class Pad (
 
     @SerializedName("id"                           ) var id                        : Int?              = null,
-    @SerializedName("url"                          ) var url                       : String?           = null,
     @SerializedName("active"                       ) var active                    : Boolean?          = null,
     @SerializedName("agencies"                     ) var agencies                  : ArrayList<Agencies> = arrayListOf(),
     @SerializedName("name"                         ) var name                      : String?           = null,

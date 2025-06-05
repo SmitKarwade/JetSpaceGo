@@ -9,7 +9,6 @@ data class Location (
 
     @SerializedName("response_mode"       ) var responseMode      : String?        = null,
     @SerializedName("id"                  ) var id                : Int?           = null,
-    @SerializedName("url"                 ) var url               : String?        = null,
     @SerializedName("name"                ) var name              : String?        = null,
     @SerializedName("celestial_body"      ) var celestialBody     : CelestialBodyL? = CelestialBodyL(),
     @SerializedName("active"              ) var active            : Boolean?       = null,

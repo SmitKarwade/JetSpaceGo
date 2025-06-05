@@ -13,8 +13,6 @@ data class Mission (
     @SerializedName("description" ) var description : String?           = null,
     @SerializedName("image"       ) var image       : String?           = null,
     @SerializedName("orbit"       ) var orbit       : Orbit?            = Orbit(),
-    @SerializedName("agencies"    ) var agencies    : ArrayList<Agencies> = arrayListOf(),
-    @SerializedName("info_urls"   ) var infoUrls    : ArrayList<String> = arrayListOf(),
-    @SerializedName("vid_urls"    ) var vidUrls     : ArrayList<String> = arrayListOf()
+    @SerializedName("agencies"    ) var agencies    : ArrayList<Agencies> = arrayListOf()
 
 ) : Parcelable
