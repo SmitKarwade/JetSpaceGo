@@ -21,6 +21,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -61,44 +66,44 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private val organizations = listOf(
+    MainViewORG("Arianespace", "https://i.pinimg.com/736x/31/08/9c/31089ce9754297181a92d331ca7d6374.jpg"),
+    MainViewORG("Astra", "https://caribbeannewsglobal.com/wp-content/uploads/2024/03/Astra_Square_Logo_Black_28White_Background29-1.jpg"),
+    MainViewORG("Bellatrix Aerospace", "https://i.pinimg.com/736x/f5/1b/9e/f51b9ea6f1bfd1d79957368d9f429c21.jpg"),
+    MainViewORG("Blue Origin", "https://logolook.net/wp-content/uploads/2021/01/Blue-Origin-Emblem.png"),
+    MainViewORG("CAS Space", "https://pbs.twimg.com/profile_images/1627785543063937024/WIi85gLa_400x400.jpg"),
+    MainViewORG("China Aerospace Science and Technology Corporation", "https://i.pinimg.com/736x/ca/ba/bb/cababba779f0a47a8f8735bff2008962.jpg"),
+    MainViewORG("Firefly Aerospace", "https://maxpolyakov.com/wp-content/uploads/2021/01/firefly_pict_desc.jpg"),
+    MainViewORG("Galactic Energy", "https://cdn.sanity.io/images/2vtv415l/production/61fd4b218ebad730d77502be800857d54873b994-1179x1180.png"),
+    MainViewORG("Glavkosmos", "https://www.glavkosmos.com/media/original/news/2023/glavkosmos_logo.jpg"),
+    MainViewORG("Indian Space Research Organization", "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Indian_Space_Research_Organisation_Logo.svg/1200px-Indian_Space_Research_Organisation_Logo.svg.png"),
+    MainViewORG("INNOSPACE", "https://sky-brokers.com/wp-content/uploads/2022/06/INNOSpace-logo.png"),
+    MainViewORG("International Launch Services", "https://download.logo.wine/logo/International_Launch_Services/International_Launch_Services-Logo.wine.png"),
+    MainViewORG("Iranian Space Agency", "https://media.tehrantimes.com/d/t/2024/08/23/4/5132675.jpg?ts=1724420772125"),
+    MainViewORG("i-Space", "https://upload.wikimedia.org/wikipedia/en/7/77/ISpace_Logo.png"),
+    MainViewORG("Japan Aerospace Exploration Agency", "https://i.pinimg.com/736x/5d/42/c5/5d42c5abb91ff3742c3ddf7c9038b53c.jpg"),
+    MainViewORG("LandSpace", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSP719XLsLfYzejcSMeb6nGNOKxe0DuBNc69pVmRonHsxeDQkonk6eYMz6OSxMhKkBN8sE&usqp=CAU"),
+    MainViewORG("Mitsubishi Heavy Industries", "https://pbs.twimg.com/media/CeItBylWoAAwvBw.jpg:large"),
+    MainViewORG("National Aeronautics and Space Administration", "https://i.pinimg.com/736x/01/a4/00/01a4004d77fcf937470e1a0edec0ed73.jpg"),
+    MainViewORG("Northrop Grumman", "https://brandlogos.net/wp-content/uploads/2022/07/northrop_grumman-logo_brandlogos.net_mqy0p.png"),
+    MainViewORG("OneSpace", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXn-lIULYKnER02vuuPjRYOxRIUBQH2VRON-voJzMhOyY2_PP9M9kYISQ4TOG9wa1Qvw&usqp=CAU"),
+    MainViewORG("Orienspace", "https://i.pinimg.com/736x/df/a0/35/dfa035fedb26bef5fd13bc4a3cd9c661.jpg"),
+    MainViewORG("Relativity Space", "https://www.factoriesinspace.com/img/thumb2/thumbnail_Relativity_White_RGB.png"),
+    MainViewORG("Rocket Lab", "https://i.pinimg.com/736x/8b/3d/c3/8b3dc33706aec11737428de5023732a6.jpg"),
+    MainViewORG("Russian Federal Space Agency (ROSCOSMOS)", "https://i.pinimg.com/736x/26/b3/6f/26b36f4f34f9ea9f6de5055aa0c26805.jpg"),
+    MainViewORG("Sea Launch", "https://danielmarin.naukas.com/files/2016/01/Sea-Launch-Logo-with-Blue-Lettering.jpg"),
+    MainViewORG("Skyroot Aerospace", "https://i.pinimg.com/736x/0a/e9/fa/0ae9fa713e86dcd2a1f8be264165d8f9.jpg"),
+    MainViewORG("Space One", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxmCAxsfGlecgrA5iKXuwcsLPlgCqM7WNaJA&s"),
+    MainViewORG("SpaceX", "https://i.pinimg.com/736x/d9/7c/5b/d97c5b4f87098d7c47893294b1336e87.jpg"),
+    MainViewORG("United Launch Alliance", "https://media2.spaceref.com/wp-content/uploads/2022/08/01123807/United_Launch_Alliance-Logo.wine_.png"),
+    MainViewORG("Virgin Galactic", "https://www.virgingalactic.com/assets/images/share.png")
+)
+
+@Preview(showBackground = true)
 @Composable
 fun MainUI(){
-
-    val organizations = listOf(
-        MainViewORG("Antrix Corporation", "https://i.pinimg.com/736x/a8/5a/83/a85a8370b4f23c516d2379b72aaff099.jpg"),
-        MainViewORG("Arianespace", "https://i.pinimg.com/736x/31/08/9c/31089ce9754297181a92d331ca7d6374.jpg"),
-        MainViewORG("Astra", "https://caribbeannewsglobal.com/wp-content/uploads/2024/03/Astra_Square_Logo_Black_28White_Background29-1.jpg"),
-        MainViewORG("Bellatrix Aerospace", "https://i.pinimg.com/736x/f5/1b/9e/f51b9ea6f1bfd1d79957368d9f429c21.jpg"),
-        MainViewORG("Blue Origin", "https://logolook.net/wp-content/uploads/2021/01/Blue-Origin-Emblem.png"),
-        MainViewORG("CAS Space", "https://pbs.twimg.com/profile_images/1627785543063937024/WIi85gLa_400x400.jpg"),
-        MainViewORG("China Aerospace Science and Technology Corporation", "https://i.pinimg.com/736x/ca/ba/bb/cababba779f0a47a8f8735bff2008962.jpg"),
-        MainViewORG("Firefly Aerospace", "https://maxpolyakov.com/wp-content/uploads/2021/01/firefly_pict_desc.jpg"),
-        MainViewORG("Galactic Energy", "https://cdn.sanity.io/images/2vtv415l/production/61fd4b218ebad730d77502be800857d54873b994-1179x1180.png"),
-        MainViewORG("Glavkosmos", "https://www.glavkosmos.com/media/original/news/2023/glavkosmos_logo.jpg"),
-        MainViewORG("Indian Space Research Organization", "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Indian_Space_Research_Organisation_Logo.svg/1200px-Indian_Space_Research_Organisation_Logo.svg.png"),
-        MainViewORG("INNOSPACE", "https://sky-brokers.com/wp-content/uploads/2022/06/INNOSpace-logo.png"),
-        MainViewORG("International Launch Services", "https://download.logo.wine/logo/International_Launch_Services/International_Launch_Services-Logo.wine.png"),
-        MainViewORG("Iranian Space Agency", "https://media.tehrantimes.com/d/t/2024/08/23/4/5132675.jpg?ts=1724420772125"),
-        MainViewORG("i-Space", "https://upload.wikimedia.org/wikipedia/en/7/77/ISpace_Logo.png"),
-        MainViewORG("Japan Aerospace Exploration Agency", "https://i.pinimg.com/736x/5d/42/c5/5d42c5abb91ff3742c3ddf7c9038b53c.jpg"),
-        MainViewORG("LandSpace", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSP719XLsLfYzejcSMeb6nGNOKxe0DuBNc69pVmRonHsxeDQkonk6eYMz6OSxMhKkBN8sE&usqp=CAU"),
-        MainViewORG("Mitsubishi Heavy Industries", "https://pbs.twimg.com/media/CeItBylWoAAwvBw.jpg:large"),
-        MainViewORG("National Aeronautics and Space Administration", "https://i.pinimg.com/736x/01/a4/00/01a4004d77fcf937470e1a0edec0ed73.jpg"),
-        MainViewORG("Northrop Grumman", "https://brandlogos.net/wp-content/uploads/2022/07/northrop_grumman-logo_brandlogos.net_mqy0p.png"),
-        MainViewORG("OneSpace", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXn-lIULYKnER02vuuPjRYOxRIUBQH2VRON-voJzMhOyY2_PP9M9kYISQ4TOG9wa1Qvw&usqp=CAU"),
-        MainViewORG("Orienspace", "https://i.pinimg.com/736x/df/a0/35/dfa035fedb26bef5fd13bc4a3cd9c661.jpg"),
-        MainViewORG("Relativity Space", "https://www.factoriesinspace.com/img/thumb2/thumbnail_Relativity_White_RGB.png"),
-        MainViewORG("Rocket Lab", "https://i.pinimg.com/736x/8b/3d/c3/8b3dc33706aec11737428de5023732a6.jpg"),
-        MainViewORG("Russian Federal Space Agency (ROSCOSMOS)", "https://i.pinimg.com/736x/26/b3/6f/26b36f4f34f9ea9f6de5055aa0c26805.jpg"),
-        MainViewORG("Sea Launch", "https://danielmarin.naukas.com/files/2016/01/Sea-Launch-Logo-with-Blue-Lettering.jpg"),
-        MainViewORG("Skyroot Aerospace", "https://i.pinimg.com/736x/0a/e9/fa/0ae9fa713e86dcd2a1f8be264165d8f9.jpg"),
-        MainViewORG("Space One", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxmCAxsfGlecgrA5iKXuwcsLPlgCqM7WNaJA&s"),
-        MainViewORG("SpaceX", "https://i.pinimg.com/736x/d9/7c/5b/d97c5b4f87098d7c47893294b1336e87.jpg"),
-        MainViewORG("United Launch Alliance", "https://media2.spaceref.com/wp-content/uploads/2022/08/01123807/United_Launch_Alliance-Logo.wine_.png"),
-        MainViewORG("Virgin Galactic", "https://www.virgingalactic.com/assets/images/share.png")
-    )
-
     val navController = rememberNavController()
+
     JetSpaceGoTheme {
         Scaffold(modifier = Modifier.fillMaxSize(),
             bottomBar = {
@@ -138,18 +143,41 @@ fun MainUI(){
 
 @Composable
 fun NestedMissionList(list: List<MainViewORG>, navController: NavController) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(list) { item ->
-            MissionCard(item) {
-                navController.currentBackStackEntry
-                    ?.savedStateHandle
-                    ?.set("msn_name", item.name)
-                navController.navigate("list")
-            }
+    var searchText by remember { mutableStateOf("") }
 
+    val filteredList = remember(searchText) {
+        list.filter {
+            it.name?.contains(searchText, ignoreCase = true) == true
+        }
+    }
+
+    Column {
+        androidx.compose.material3.OutlinedTextField(
+            value = searchText,
+            onValueChange = { searchText = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            label = { Text("Search Organization") },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(filteredList) { item ->
+                MissionCard(item) {
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("msn_name", item.name)
+                    navController.navigate("list")
+                }
+            }
         }
     }
 }
+
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
@@ -172,7 +200,7 @@ fun MissionCard(org: MainViewORG, onItemClick : () -> Unit) {
                         contentDescription = it1,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(350.dp)
+                            .height(250.dp)
                             .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.FillBounds
                     )
@@ -185,30 +213,10 @@ fun MissionCard(org: MainViewORG, onItemClick : () -> Unit) {
                 Text(
                     text = it,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = 24.sp,
-                    maxLines = 1,
+                    fontSize = 20.sp,
                     modifier = Modifier.padding(10.dp),
-                    overflow = TextOverflow.Ellipsis
                 )
             }
-
-//                mission.launchServiceProvider?.name?.let {
-//                    Text(
-//                        text = it,
-//                        fontSize = 14.sp,
-//                        color = Color.Gray,
-//                        maxLines = 1,
-//                        overflow = TextOverflow.Ellipsis
-//                    )
-//                }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    JetSpaceGoTheme {
-
     }
 }
