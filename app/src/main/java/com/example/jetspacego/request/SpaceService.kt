@@ -9,6 +9,7 @@ interface SpaceService {
     suspend fun getMissions(
         @Query("offset") offset: Int,
         @Query("limit") limit: Int = 10,
-        @Query("lsp__name") search: String?
+        @Query("lsp__name") search: String?,
+        @Query("ordering") ordering: String = "-net"
     ): MissionResponse
 }
