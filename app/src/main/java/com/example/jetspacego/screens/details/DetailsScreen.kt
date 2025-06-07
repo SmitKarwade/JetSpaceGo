@@ -8,12 +8,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -49,6 +51,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -62,7 +65,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun DetailsScreen(navController: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Overview", "Agencies", "More Info")
+    val tabs = listOf("Launch", "Agencies", "More Info")
 
     val result : Results? = navController.previousBackStackEntry?.savedStateHandle?.get<Results>("msn")
 
@@ -77,19 +80,12 @@ fun DetailsScreen(navController: NavController) {
             }
         }
 
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-        ) {
-            when (selectedTab) {
-                0 -> result?.let {
-                    OverviewTab(it, navController = navController)
-                }
-                1 -> result?.mission?.agencies?.let { AgenciesTab(it) }
-                2 -> result?.let { MoreInfoTab(it) }
+        when (selectedTab) {
+            0 -> result?.let {
+                OverviewTab(it, navController = navController)
             }
+            1 -> result?.mission?.agencies?.let { AgenciesTab(it) }
+            2 -> result?.let { MoreInfoTab(it) }
         }
     }
 }
@@ -104,11 +100,14 @@ fun OverviewTab(result: Results, navController: NavController) {
         MainViewORG(result?.image?.name, result?.image?.imageUrl),
         MainViewORG("Location", result?.pad?.location?.mapImage)
     )
+    val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(16.dp)
+        .fillMaxSize()
+        .verticalScroll(scrollState)) {
 
         Spacer(modifier = Modifier.height(8.dp))
-        result.launchServiceProvider?.name?.let { Text(text = it, style = MaterialTheme.typography.displaySmall) }
+        result.launchServiceProvider?.name?.let { Text(text = it, style = MaterialTheme.typography.headlineMedium) }
         Spacer(modifier = Modifier.height(8.dp))
         if(result.pad?.agencies?.size != 0) {
             if (result.pad?.agencies?.get(0)?.country?.size != 0) {
@@ -171,13 +170,14 @@ fun CarouselCard(item: MainViewORG) {
     Column(
         modifier = Modifier
             .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-            .wrapContentSize()
+            .wrapContentHeight()
+            .width(300.dp)
     ) {
         item.image?.let { GlideImage(model = it,
             contentDescription = null.toString(),
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier.width(400.dp)
-                .height(500.dp)
+            modifier = Modifier.width(300.dp)
+                .height(400.dp)
                 .clip(shape = RoundedCornerShape(12.dp))) }
         Spacer(modifier = Modifier.height(8.dp))
         item.name?.let {
@@ -185,7 +185,9 @@ fun CarouselCard(item: MainViewORG) {
                 text = it,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(10.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -199,16 +201,26 @@ fun AgenciesTab(agencies: ArrayList<Agencies>) {
         LazyColumn {
             items(agencies) { agency ->
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp).wrapContentHeight(),
                     elevation = CardDefaults.cardElevation(4.dp),
                     colors = CardDefaults.cardColors(Color.White)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        agency.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
-                        Text(text = "${agency.abbrev}", fontSize = 14.sp)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = "Type: ${agency.type?.name}")
+                    Row {
+                        GlideImageFun(agency.logo?.imageUrl, agency.name, ContentScale.Fit, Modifier.width(180.dp).height(180.dp))
+
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            agency.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Administrator: ${agency.administrator}", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Founded: ${agency.foundingYear}")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Launcher: ${agency.launchers}")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(text = "Type: ${agency.type?.name}")
+                        }
                     }
+
                 }
             }
         }
@@ -216,26 +228,44 @@ fun AgenciesTab(agencies: ArrayList<Agencies>) {
         Box(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
             Text(
                 text = "No Agencies",
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
+                color = Color.Black
             )
         }
+    }
+}
+
+@Composable
+fun GlideImageFun(model: Any?, contentDescription: String?, contentScale: ContentScale, modifier: Modifier) {
+    if (contentDescription != null) {
+        GlideImage(model = model.toString(),
+            contentDescription = contentDescription,
+            contentScale = contentScale,
+            modifier = modifier)
     }
 }
 
 
 @Composable
 fun MoreInfoTab(result: Results) {
-    val context = LocalContext.current
+    if (result.mission?.agencies?.size != 0) {
+        Column(modifier = Modifier.padding(16.dp)) {
 
-    Column(modifier = Modifier.padding(16.dp)) {
+            Spacer(modifier = Modifier.height(8.dp))
+            result.mission?.agencies?.get(0)?.wikiUrl?.let { url ->
+                ClickableLink(text = "Wikipedia", url = url)
+            }
 
-        Spacer(modifier = Modifier.height(8.dp))
-        result.mission?.agencies?.get(0)?.wikiUrl?.let { url ->
-            ClickableLink(text = "Wikipedia", url = url)
+            result.mission?.agencies?.get(0)?.infoUrl?.let { url ->
+                ClickableLink(text = "Official page", url = url)
+            }
         }
-
-        result.mission?.agencies?.get(0)?.infoUrl?.let { url ->
-            ClickableLink(text = "Official page", url = url)
+    } else {
+        Box(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+            Text(
+                text = "No More Info",
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
     }
 }
