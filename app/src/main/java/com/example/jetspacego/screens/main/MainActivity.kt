@@ -1,10 +1,9 @@
 package com.example.jetspacego.screens.main
 
+import TicketScreen
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +20,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,25 +29,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.example.jetspacego.model.MainViewORG
-import com.example.jetspacego.model.launches.Results
-import com.example.jetspacego.paging.SpaceViewModel
 import com.example.jetspacego.screens.details.DetailsScreen
 import com.example.jetspacego.screens.listbook.ListBook
 import com.example.jetspacego.screens.profile.ProfileScreen
-import com.example.jetspacego.screens.ticket.TicketScreen
 import com.example.jetspacego.ui.theme.JetSpaceGoTheme
 import com.example.jetspacego.widgets.BottomBar
 import dagger.hilt.android.AndroidEntryPoint
