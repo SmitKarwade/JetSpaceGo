@@ -1,5 +1,6 @@
 package com.example.jetspacego.paging
 
+import android.net.Uri
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
@@ -48,10 +49,10 @@ class SpaceDataSource(
 
     private fun parseOffsetFromUrl(url: String): Int? {
         return try {
-            url.substringAfter("offset=")
-                .toIntOrNull()
+            val uri = Uri.parse(url)
+            uri.getQueryParameter("offset")?.toIntOrNull()
         } catch (e: Exception) {
-            Log.e("Paging", "Error parsing offset from URL: $url", e)
+            Log.e("Paging", "Error parsing offset from URL: $url ($e)")
             null
         }
     }
