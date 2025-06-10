@@ -70,7 +70,7 @@ fun DisplayMission(navController: NavController, viewModel: SpaceViewModel = hil
         ) {
             items(
                 count = displayItems.itemCount,
-                key = { index -> displayItems[index]?.id ?: index },
+                contentType = { index -> "missionContent" },
                 span = { index ->
                     if (index == 0) GridItemSpan(2) else GridItemSpan(1)
                 }
@@ -186,7 +186,6 @@ fun MissionCard(mission: Results, onItemClick : () -> Unit) {
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
             mission.net?.let {
                 Text(
                     text = "${getMissionLaunchDate(it)}",
