@@ -7,9 +7,9 @@ import retrofit2.http.Query
 interface SpaceService {
     @GET("launches")
     suspend fun getMissions(
-        @Query("offset") offset: Int,
-        @Query("limit") limit: Int = 10,
+        @Query("ordering") ordering: String = "-net",
         @Query("lsp__name") search: String?,
-        @Query("ordering") ordering: String = "-net"
+        @Query("limit") limit: Int = 10,
+        @Query("offset") offset: Int
     ): MissionResponse
 }
