@@ -22,6 +22,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    android {
+        sourceSets["main"].assets.srcDirs("src/main/assets")
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -54,6 +58,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-analytics")
 
+    implementation("io.github.sceneview:sceneview:2.3.0")
+
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
@@ -71,6 +77,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.navigation.runtime.android)
     kapt(libs.hilt.android.compiler)
 
 
