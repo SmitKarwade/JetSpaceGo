@@ -10,6 +10,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import io.github.sceneview.Scene
 import io.github.sceneview.collision.HitResult
@@ -56,6 +58,18 @@ fun ModelViewer(context: Context) {
     val materialLoader = rememberMaterialLoader(engine)
     val environmentLoader = rememberEnvironmentLoader(engine)
 
+    val modelNode = remember {
+        ModelNode(
+            modelInstance = modelLoader.createModelInstance(
+                assetFileLocation = "rocketAnim.glb"
+            ),
+            scaleToUnits = 1.0f
+        )
+    }
+
+    val isZoomedIn = remember { mutableStateOf(false) }
+
+
     Scene(
         modifier = Modifier.fillMaxSize(),
         engine = engine,
@@ -86,53 +100,52 @@ fun ModelViewer(context: Context) {
 
         // Configure camera position
         cameraNode = rememberCameraNode(engine) {
-            position = Position(z = 4.0f)
+            position = Position(y = 0.5f, z = 1.5f)
         },
 
         // Enable user interaction with the camera
-        cameraManipulator = rememberCameraManipulator(),
+        cameraManipulator = null,
 
         // Add 3D models and objects to the scene
         childNodes = rememberNodes {
             // Add a glTF model
-            add(
-                ModelNode(
-                    // Create a single instance model from assets file
-                    modelInstance = modelLoader.createModelInstance(
-                        assetFileLocation = "pslv_c40.glb"
-                    ),
-                    // Make the model fit into a 1 unit cube
-                    scaleToUnits = 1.0f
-                )
-            )
+            add(modelNode)
 
             // Add a 3D cylinder with custom material
-            add(
-                CylinderNode(
-                    engine = engine,
-                    radius = 0.2f,
-                    height = 2.0f,
-                    // Simple colored material with physics properties
-                    materialInstance = materialLoader.createColorInstance(
-                        color = Color.Blue,
-                        metallic = 0.5f,
-                        roughness = 0.2f,
-                        reflectance = 0.4f
-                    )
-                ).apply {
-                    // Define the node position and rotation
-                    transform(
-                        position = Position(y = 1.0f),
-                        rotation = Rotation(x = 90.0f)
-                    )
-                })
+//            add(
+//                CylinderNode(
+//                    engine = engine,
+//                    radius = 0.2f,
+//                    height = 2.0f,
+//                    // Simple colored material with physics properties
+//                    materialInstance = materialLoader.createColorInstance(
+//                        color = Color.Blue,
+//                        metallic = 0.5f,
+//                        roughness = 0.2f,
+//                        reflectance = 0.4f
+//                    )
+//                ).apply {
+//                    // Define the node position and rotation
+//                    transform(
+//                        position = Position(y = 1.0f),
+//                        rotation = Rotation(x = 90.0f)
+//                    )
+//                })
         },
 
         // Handle user interactions
         onGestureListener = rememberOnGestureListener(
             onDoubleTapEvent = { event, tappedNode ->
-                tappedNode?.let { it.scale *= 2.0f }
+                tappedNode?.let {
+                    if (isZoomedIn.value) {
+                        it.scale /= 0.5f  // Zoom out
+                    } else {
+                        it.scale *= 0.5f  // Zoom in
+                    }
+                    isZoomedIn.value = !isZoomedIn.value
+                }
             }
+
         ),
 
         // Handle tap event on the scene
