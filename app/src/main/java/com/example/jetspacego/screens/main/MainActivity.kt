@@ -67,7 +67,6 @@ private val organizations = listOf(
     MainViewORG("China Aerospace Science and Technology Corporation", "https://i.pinimg.com/736x/ca/ba/bb/cababba779f0a47a8f8735bff2008962.jpg"),
     MainViewORG("Firefly Aerospace", "https://maxpolyakov.com/wp-content/uploads/2021/01/firefly_pict_desc.jpg"),
     MainViewORG("Galactic Energy", "https://cdn.sanity.io/images/2vtv415l/production/61fd4b218ebad730d77502be800857d54873b994-1179x1180.png"),
-    MainViewORG("Glavkosmos", "https://www.glavkosmos.com/media/original/news/2023/glavkosmos_logo.jpg"),
     MainViewORG("Indian Space Research Organization", "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Indian_Space_Research_Organisation_Logo.svg/1200px-Indian_Space_Research_Organisation_Logo.svg.png"),
     MainViewORG("INNOSPACE", "https://sky-brokers.com/wp-content/uploads/2022/06/INNOSpace-logo.png"),
     MainViewORG("International Launch Services", "https://download.logo.wine/logo/International_Launch_Services/International_Launch_Services-Logo.wine.png"),
@@ -192,7 +191,7 @@ fun MissionCard(org: MainViewORG, onItemClick : () -> Unit) {
                         contentDescription = it1,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)
+                            .height(225.dp)
                             .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.FillBounds
                     )
