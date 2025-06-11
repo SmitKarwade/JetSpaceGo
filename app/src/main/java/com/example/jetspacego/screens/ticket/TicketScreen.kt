@@ -10,9 +10,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.example.jetspacego.model.rocket.RocketModel
+import com.example.jetspacego.model.rocket.rocketList
 import io.github.sceneview.Scene
 import io.github.sceneview.collision.HitResult
 import io.github.sceneview.math.Position
@@ -33,130 +44,157 @@ import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TicketScreen(navController: NavController){
-    val context = LocalContext
-    Column {
+    val context = LocalContext.current
+    var selectedModel by remember { mutableStateOf(rocketList[0]) }
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxSize()) {
         Text("Rocket 3D Model")
         Spacer(modifier = Modifier.height(16.dp))
-        ModelViewer(context = context.current)
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Dropdown
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                TextField(
+                    value = selectedModel.name,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Select Rocket") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                    modifier = Modifier.menuAnchor()
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    rocketList.forEach { model ->
+                        DropdownMenuItem(
+                            text = { Text(model.name) },
+                            onClick = {
+                                selectedModel = model
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+            ModelViewer(context = context, selectedModel)
+        }
     }
 }
 
 
 @Composable
-fun ModelViewer(context: Context) {
-
-// Filament 3D Engine
+fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
     val engine = rememberEngine()
     val view = rememberView(engine)
 
-// Asset loaders
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val environmentLoader = rememberEnvironmentLoader(engine)
 
-    val modelNode = remember {
-        ModelNode(
-            modelInstance = modelLoader.createModelInstance(
-                assetFileLocation = "rocketAnim.glb"
-            ),
-            scaleToUnits = 1.0f
-        )
+    val modelInstance by produceState<ModelNode?>(initialValue = null, rocketModelURL) {
+        // Clear existing value immediately
+        value = null
+
+        val file = withContext(Dispatchers.IO) {
+            try {
+                downloadModelFile(context, rocketModelURL.url)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+
+        file?.let {
+            try {
+                val instance = modelLoader.createModelInstance(file = it)
+                value = ModelNode(modelInstance = instance, scaleToUnits = 1.0f)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                value = null
+            }
+        }
     }
 
-    val isZoomedIn = remember { mutableStateOf(false) }
 
 
-    Scene(
-        modifier = Modifier.fillMaxSize(),
-        engine = engine,
+    val isZoomedIn = remember(rocketModelURL) { mutableStateOf(false) }
 
-        // Core rendering components
-        view = view,
-        renderer = rememberRenderer(engine),
-        scene = rememberScene(engine),
-
-        // Asset loaders
-        modelLoader = modelLoader,
-        materialLoader = materialLoader,
-        environmentLoader = environmentLoader,
-
-        // Collision System
-        collisionSystem = rememberCollisionSystem(view),
-
-        mainLightNode = rememberMainLightNode(engine) {
-        intensity = 100_000.0f
-        },
-
-        // Set up environment lighting and skybox from an HDR file
-//        environment = rememberEnvironment(environmentLoader) {
-//            environmentLoader.createHDREnvironment(
-//                assetFileLocation = "environments/sky_2k.hdr"
-//            )!!
-//        },
-
-        // Configure camera position
-        cameraNode = rememberCameraNode(engine) {
-            position = Position(y = 0.5f, z = 1.5f)
-        },
-
-        // Enable user interaction with the camera
-        cameraManipulator = null,
-
-        // Add 3D models and objects to the scene
-        childNodes = rememberNodes {
-            // Add a glTF model
-            add(modelNode)
-
-            // Add a 3D cylinder with custom material
-//            add(
-//                CylinderNode(
-//                    engine = engine,
-//                    radius = 0.2f,
-//                    height = 2.0f,
-//                    // Simple colored material with physics properties
-//                    materialInstance = materialLoader.createColorInstance(
-//                        color = Color.Blue,
-//                        metallic = 0.5f,
-//                        roughness = 0.2f,
-//                        reflectance = 0.4f
-//                    )
-//                ).apply {
-//                    // Define the node position and rotation
-//                    transform(
-//                        position = Position(y = 1.0f),
-//                        rotation = Rotation(x = 90.0f)
-//                    )
-//                })
-        },
-
-        // Handle user interactions
-        onGestureListener = rememberOnGestureListener(
-            onDoubleTapEvent = { event, tappedNode ->
-                tappedNode?.let {
-                    if (isZoomedIn.value) {
-                        it.scale /= 0.5f  // Zoom out
-                    } else {
-                        it.scale *= 0.5f  // Zoom in
-                    }
-                    isZoomedIn.value = !isZoomedIn.value
+    modelInstance?.let { modelNode ->
+        Scene(
+            modifier = Modifier.fillMaxSize(),
+            engine = engine,
+            view = view,
+            renderer = rememberRenderer(engine),
+            scene = rememberScene(engine),
+            modelLoader = modelLoader,
+            materialLoader = materialLoader,
+            environmentLoader = environmentLoader,
+            collisionSystem = rememberCollisionSystem(view),
+            mainLightNode = rememberMainLightNode(engine) {
+                intensity = 100_000.0f
+            },
+            cameraNode = rememberCameraNode(engine) {
+                position = Position(y = 0.5f, z = 1.5f)
+            },
+            cameraManipulator = null,
+            childNodes = remember(rocketModelURL) {
+                mutableListOf(modelNode)
+            },
+//            onGestureListener = remember(rocketModelURL) {
+//                rememberOnGestureListener(
+//                    onDoubleTapEvent = { _, tappedNode ->
+//                        tappedNode?.let {
+//                            if (isZoomedIn.value) {
+//                                it.scale /= 0.5f
+//                            } else {
+//                                it.scale *= 0.5f
+//                            }
+//                            isZoomedIn.value = !isZoomedIn.value
+//                        }
+//                    }
+//                )
+//            },
+            onTouchEvent = { _, hitResult ->
+                hitResult?.let {
+                    println("World tapped : ${it.worldPosition}")
                 }
-            }
-
-        ),
-
-        // Handle tap event on the scene
-        onTouchEvent = { event: MotionEvent, hitResult: HitResult? ->
-            hitResult?.let { println("World tapped : ${it.worldPosition}") }
-            false
-        },
-
-        // Frame update callback
-        onFrame = { frameTimeNanos ->
-            // Handle per-frame updates here
-        }
-    )
+                false
+            },
+            onFrame = { /* Optional frame update logic */ }
+        )
+    } ?: run {
+        Text("Loading model...", modifier = Modifier.fillMaxSize())
+    }
 }
+
+
+
+suspend fun downloadModelFile(context: Context, url: String): File {
+    val file = File(context.cacheDir, "model.glb")
+    withContext(Dispatchers.IO) {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.connect()
+        file.outputStream().use { output ->
+            connection.inputStream.use { input ->
+                input.copyTo(output)
+            }
+        }
+    }
+    return file
+}
+
