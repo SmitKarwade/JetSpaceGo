@@ -45,12 +45,23 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/INDEX.LIST")
+        }
+    }
 }
 
 dependencies {
 
 //    implementation("io.coil-kt.coil3:coil-compose:3.1.0")
 //    implementation("io.coil-kt.coil:coil-okhttp:3.0.0-rc03")
+
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.18.0")
+    implementation("com.google.cloud:google-cloud-texttospeech:2.33.0")
+
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("androidx.compose.foundation:foundation:1.8.2")
@@ -59,6 +70,9 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
 
     implementation("io.github.sceneview:sceneview:2.3.0")
+
+    implementation("androidx.media3:media3-ui-compose:1.7.1")
+    implementation("androidx.media3:media3-exoplayer:1.7.1")
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
