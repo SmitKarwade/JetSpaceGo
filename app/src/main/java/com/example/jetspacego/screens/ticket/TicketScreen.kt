@@ -1,5 +1,4 @@
 import android.content.Context
-import android.view.MotionEvent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -16,31 +15,26 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import com.example.jetspacego.model.rocket.RocketModel
 import com.example.jetspacego.model.rocket.rocketList
+import com.example.jetspacego.viewmodel.RocketViewModel
 import io.github.sceneview.Scene
-import io.github.sceneview.collision.HitResult
 import io.github.sceneview.math.Position
-import io.github.sceneview.math.Rotation
-import io.github.sceneview.node.CylinderNode
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.rememberCameraManipulator
 import io.github.sceneview.rememberCameraNode
 import io.github.sceneview.rememberCollisionSystem
 import io.github.sceneview.rememberEngine
-import io.github.sceneview.rememberEnvironment
 import io.github.sceneview.rememberEnvironmentLoader
 import io.github.sceneview.rememberMainLightNode
 import io.github.sceneview.rememberMaterialLoader
 import io.github.sceneview.rememberModelLoader
-import io.github.sceneview.rememberNodes
-import io.github.sceneview.rememberOnGestureListener
 import io.github.sceneview.rememberRenderer
 import io.github.sceneview.rememberScene
 import io.github.sceneview.rememberView
@@ -49,24 +43,42 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
+import java.util.Base64
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TicketScreen(navController: NavController){
+fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hiltViewModel()) {
     val context = LocalContext.current
     var selectedModel by remember { mutableStateOf(rocketList[0]) }
     var expanded by remember { mutableStateOf(false) }
+    var playRequested by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text("Rocket 3D Model")
-        Spacer(modifier = Modifier.height(16.dp))
-
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Dropdown
+            Text(text = "Rocket 3D Model", modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
             ExposedDropdownMenuBox(
                 expanded = expanded,
-                onExpandedChange = { expanded = !expanded }
+                onExpandedChange = { expanded = !expanded},
+                modifier = Modifier.padding(8.dp)
+                    .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
             ) {
                 TextField(
                     value = selectedModel.name,
@@ -74,7 +86,18 @@ fun TicketScreen(navController: NavController){
                     readOnly = true,
                     label = { Text("Select Rocket") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                    modifier = Modifier.menuAnchor()
+                    modifier = Modifier
+                        .menuAnchor()
+                        .background(Color(0xFFF0F0F0), RoundedCornerShape(10.dp)),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF0F0F0),
+                        unfocusedContainerColor = Color(0xFFF0F0F0),
+                        disabledContainerColor = Color(0xFFF0F0F0),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -91,10 +114,29 @@ fun TicketScreen(navController: NavController){
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
             ModelViewer(context = context, selectedModel)
+
+            if (playRequested) {
+                RocketAudioPlayer(viewModel = viewModel, rocketDesc = selectedModel.description)
+            }
+        }
+
+        // FAB layered on top using Box
+        FloatingActionButton(
+            onClick = { playRequested = true },
+            containerColor = Color(0xFF1E88E5),
+            contentColor = Color.White,
+            modifier = Modifier
+                .align(androidx.compose.ui.Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Text(text = "🔊", fontSize = 22.sp)
         }
     }
 }
+
 
 
 @Composable
@@ -105,9 +147,9 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
     val modelLoader = rememberModelLoader(engine)
     val materialLoader = rememberMaterialLoader(engine)
     val environmentLoader = rememberEnvironmentLoader(engine)
+    val cameraManipulator = rememberCameraManipulator()
 
     val modelInstance by produceState<ModelNode?>(initialValue = null, rocketModelURL) {
-        // Clear existing value immediately
         value = null
 
         val file = withContext(Dispatchers.IO) {
@@ -122,7 +164,7 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
         file?.let {
             try {
                 val instance = modelLoader.createModelInstance(file = it)
-                value = ModelNode(modelInstance = instance, scaleToUnits = 1.0f)
+                value = ModelNode(modelInstance = instance, scaleToUnits = 0.4f)
             } catch (e: Exception) {
                 e.printStackTrace()
                 value = null
@@ -149,9 +191,9 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
                 intensity = 100_000.0f
             },
             cameraNode = rememberCameraNode(engine) {
-                position = Position(y = 0.5f, z = 1.5f)
+                position = Position(z = 2.5f)
             },
-            cameraManipulator = null,
+            cameraManipulator = cameraManipulator,
             childNodes = remember(rocketModelURL) {
                 mutableListOf(modelNode)
             },
@@ -175,12 +217,34 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
                 }
                 false
             },
-            onFrame = { /* Optional frame update logic */ }
+            onFrame = { }
         )
     } ?: run {
         Text("Loading model...", modifier = Modifier.fillMaxSize())
     }
 }
+
+@Composable
+fun RocketAudioPlayer(viewModel: RocketViewModel, rocketDesc: String) {
+    val context = LocalContext.current
+    val audioBase64 by viewModel.audioBase64.collectAsState()
+
+    LaunchedEffect(rocketDesc) {
+        if (audioBase64 == null) {
+            viewModel.getRocketAudio(rocketDesc)
+        }
+    }
+
+    LaunchedEffect(audioBase64) {
+        audioBase64?.let { base64 ->
+            val file = withContext(Dispatchers.IO) {
+                saveBase64ToMp3File(context, base64)
+            }
+            playWithExoPlayer(context, file)
+        }
+    }
+}
+
 
 
 
@@ -197,4 +261,44 @@ suspend fun downloadModelFile(context: Context, url: String): File {
     }
     return file
 }
+
+
+
+
+
+suspend fun saveBase64ToMp3File(context: Context, base64: String): File = withContext(Dispatchers.IO) {
+    val bytes = Base64.getDecoder().decode(base64)
+    val file = File(context.cacheDir, "rocket_audio.mp3")
+    file.writeBytes(bytes)
+    file
+}
+
+
+fun playWithExoPlayer(context: Context, file: File) {
+    val player = ExoPlayer.Builder(context).build()
+    val mediaItem = MediaItem.fromUri(Uri.fromFile(file))
+    player.setMediaItem(mediaItem)
+
+    player.addListener(object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (playbackState == Player.STATE_ENDED) {
+                player.release()
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            android.util.Log.e("AudioError", "Playback error: ${error.message}")
+            player.release()
+        }
+    })
+
+    player.prepare()
+    player.play()
+
+}
+
+
+
+
+
 
