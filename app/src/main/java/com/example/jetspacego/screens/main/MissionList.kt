@@ -197,7 +197,7 @@ fun MissionCard(mission: Results, onItemClick : () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             Box(modifier = Modifier.border(1.dp, Color.Gray, RoundedCornerShape(4.dp)).align(Alignment.Start)) {
                 Text(text = getMissionStatus(mission.net.toString()), color = Color.Gray,
-                    fontSize = 12.sp)
+                    fontSize = 12.sp, modifier = Modifier.padding(4.dp))
             }
         }
     }
