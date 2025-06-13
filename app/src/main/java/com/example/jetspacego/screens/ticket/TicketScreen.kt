@@ -97,8 +97,8 @@ fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hilt
                         .background(Color(0xFFF0F0F0), RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFFF0F0F0),
-                        unfocusedContainerColor = Color(0xFFF0F0F0),
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
                         disabledContainerColor = Color(0xFFF0F0F0),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
