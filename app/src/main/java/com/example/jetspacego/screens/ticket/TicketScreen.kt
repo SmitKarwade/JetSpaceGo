@@ -57,8 +57,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import java.util.Base64
+
+import androidx.media3.datasource.ByteArrayDataSource
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,9 +124,6 @@ fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hilt
             Spacer(modifier = Modifier.height(8.dp))
             ModelViewer(context = context, selectedModel)
 
-            if (playRequested) {
-                RocketAudioPlayer(viewModel = viewModel, rocketDesc = selectedModel.description)
-            }
         }
 
         // FAB layered on top using Box
@@ -133,6 +136,21 @@ fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hilt
                 .padding(16.dp)
         ) {
             Text(text = "🔊", fontSize = 22.sp)
+        }
+
+        if (playRequested) {
+            RocketAudioPlayer(
+                viewModel = viewModel,
+                rocketDesc = selectedModel.description,
+                playRequested = playRequested,
+                onPlaybackHandled = {
+                    playRequested = false
+                }
+            )
+        }
+
+        LaunchedEffect(selectedModel) {
+            viewModel.clearAudioBase64()
         }
     }
 }
@@ -225,22 +243,26 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
 }
 
 @Composable
-fun RocketAudioPlayer(viewModel: RocketViewModel, rocketDesc: String) {
+fun RocketAudioPlayer(
+    viewModel: RocketViewModel,
+    rocketDesc: String,
+    playRequested: Boolean,
+    onPlaybackHandled: () -> Unit
+) {
     val context = LocalContext.current
     val audioBase64 by viewModel.audioBase64.collectAsState()
 
-    LaunchedEffect(rocketDesc) {
-        if (audioBase64 == null) {
+
+    LaunchedEffect(playRequested) {
+        if (playRequested) {
             viewModel.getRocketAudio(rocketDesc)
         }
     }
 
-    LaunchedEffect(audioBase64) {
-        audioBase64?.let { base64 ->
-            val file = withContext(Dispatchers.IO) {
-                saveBase64ToMp3File(context, base64)
-            }
-            playWithExoPlayer(context, file)
+    LaunchedEffect(playRequested, audioBase64) {
+        if (playRequested && audioBase64 != null) {
+            playBase64WithExoPlayer(context, audioBase64!!)
+            onPlaybackHandled()
         }
     }
 }
@@ -262,40 +284,42 @@ suspend fun downloadModelFile(context: Context, url: String): File {
     return file
 }
 
+private var exoPlayer: ExoPlayer? = null
 
+@androidx.annotation.OptIn(UnstableApi::class)
+fun playBase64WithExoPlayer(context: Context, base64: String) {
+    exoPlayer?.release() // Clean previous
+    exoPlayer = ExoPlayer.Builder(context).build().apply {
+        val decodedBytes = Base64.getDecoder().decode(base64)
+        val dataSourceFactory = DataSource.Factory {
+            ByteArrayDataSource(decodedBytes)
+        }
 
+        val mediaItem = MediaItem.fromUri("memory://audio.mp3")
+        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(mediaItem)
 
+        setMediaSource(mediaSource)
+        prepare()
+        play()
 
-suspend fun saveBase64ToMp3File(context: Context, base64: String): File = withContext(Dispatchers.IO) {
-    val bytes = Base64.getDecoder().decode(base64)
-    val file = File(context.cacheDir, "rocket_audio.mp3")
-    file.writeBytes(bytes)
-    file
-}
-
-
-fun playWithExoPlayer(context: Context, file: File) {
-    val player = ExoPlayer.Builder(context).build()
-    val mediaItem = MediaItem.fromUri(Uri.fromFile(file))
-    player.setMediaItem(mediaItem)
-
-    player.addListener(object : Player.Listener {
-        override fun onPlaybackStateChanged(playbackState: Int) {
-            if (playbackState == Player.STATE_ENDED) {
-                player.release()
+        addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_ENDED) {
+                    release()
+                    exoPlayer = null
+                }
             }
-        }
 
-        override fun onPlayerError(error: PlaybackException) {
-            android.util.Log.e("AudioError", "Playback error: ${error.message}")
-            player.release()
-        }
-    })
-
-    player.prepare()
-    player.play()
-
+            override fun onPlayerError(error: PlaybackException) {
+                android.util.Log.e("AudioError", "Playback error: ${error.message}")
+                release()
+                exoPlayer = null
+            }
+        })
+    }
 }
+
 
 
 
