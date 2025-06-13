@@ -37,4 +37,8 @@ class RocketViewModel @Inject constructor(
             _audioBase64.value = null
         }
     }
+
+    fun clearAudioBase64() {
+        _audioBase64.value = null
+    }
 }
