@@ -140,7 +140,7 @@ fun MissionCard(mission: Results, onItemClick : () -> Unit) {
         onClick = {onItemClick()},
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color(0x802E5979))
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             mission.image?.imageUrl?.let {
@@ -195,8 +195,8 @@ fun MissionCard(mission: Results, onItemClick : () -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            Box(modifier = Modifier.border(1.dp, Color.Gray, RoundedCornerShape(4.dp)).align(Alignment.Start)) {
-                Text(text = getMissionStatus(mission.net.toString()), color = Color.Gray,
+            Box(modifier = Modifier.border(2.dp, Color(0xE6324B73), RoundedCornerShape(4.dp)).align(Alignment.Start)) {
+                Text(text = getMissionStatus(mission.net.toString()), color = Color.White,
                     fontSize = 12.sp, modifier = Modifier.padding(4.dp))
             }
         }
@@ -271,7 +271,7 @@ fun CountdownMissionCard(mission: Results, onItemClick: () -> Unit) {
         onClick = { onItemClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color(0x802E5979))
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             mission.image?.imageUrl?.let {

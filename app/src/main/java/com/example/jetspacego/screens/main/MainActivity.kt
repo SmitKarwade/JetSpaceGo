@@ -7,6 +7,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -88,7 +90,7 @@ private val organizations = listOf(
     OrgView("Firefly Aerospace", R.drawable.firefly),
     OrgView("Galactic Energy", R.drawable.galacticenergy),
     OrgView("Indian Space Research Organization", R.drawable.isro),
-    OrgView("INNOSPACE", R.drawable.innospace),
+    OrgView("Innospace", R.drawable.innospace),
     OrgView("International Launch Services", R.drawable.ils),
     OrgView("Iranian Space Agency", R.drawable.isa),
     OrgView("i-Space", R.drawable.ispace),
@@ -112,38 +114,48 @@ fun MainUI(){
     val navController = rememberNavController()
 
     JetSpaceGoTheme {
-        Scaffold(modifier = Modifier.fillMaxSize(),
-            bottomBar = {
-                BottomBar(navController)
-            }) { innerPadding ->
-            Box(modifier = Modifier.fillMaxSize().padding(innerPadding)){
-                NavHost(navController = navController, startDestination = "main") {
-                    composable("main"){
-                        NestedMissionList(organizations, navController = navController)
-                    }
+        Box(modifier = Modifier.fillMaxSize()) {
+            Image(
+                painter = painterResource(id = R.drawable.background),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
 
-                    composable("list"){
-                        MissionList(navController = navController)
-                    }
+            Scaffold(modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                bottomBar = {
+                    BottomBar(navController)
+                }) { innerPadding ->
+                Box(modifier = Modifier.fillMaxSize().padding(innerPadding)){
+                    NavHost(navController = navController, startDestination = "main") {
+                        composable("main"){
+                            NestedMissionList(organizations, navController = navController)
+                        }
 
-                    composable("profile"){
-                        ProfileScreen(navController = navController)
-                    }
+                        composable("list"){
+                            MissionList(navController = navController)
+                        }
 
-                    composable("ticket"){
-                        TicketScreen(navController = navController)
-                    }
+                        composable("profile"){
+                            ProfileScreen(navController = navController)
+                        }
 
-                    composable("details"){
-                        DetailsScreen(navController = navController)
-                    }
+                        composable("ticket"){
+                            TicketScreen(navController = navController)
+                        }
 
-                    composable("listBook"){
-                        ListBook(navController = navController)
+                        composable("details"){
+                            DetailsScreen(navController = navController)
+                        }
+
+                        composable("listBook"){
+                            ListBook(navController = navController)
+                        }
                     }
                 }
             }
-
         }
     }
 }
@@ -163,8 +175,9 @@ fun NestedMissionList(list: List<OrgView>, navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+                .padding(16.dp)
+                .border(2.dp, Color(0xE6324B73), RoundedCornerShape(12.dp)),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -182,11 +195,16 @@ fun NestedMissionList(list: List<OrgView>, navController: NavController) {
                 },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
+                    cursorColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedLabelColor = Color.White,
+                    unfocusedLeadingIconColor = Color.White,
+                    focusedLeadingIconColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
                     focusedLabelColor = Color.Transparent,
-                    focusedContainerColor = Color.White
+                    focusedContainerColor = Color.Transparent
                 )
             )
         }
@@ -218,7 +236,7 @@ fun MissionCard(org: OrgView, onItemClick : () -> Unit) {
             .wrapContentHeight(),
         onClick = {onItemClick()},
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Color(0x802E5979)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column() {

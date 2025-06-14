@@ -50,6 +50,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
@@ -77,37 +78,44 @@ fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hilt
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Text(text = "Rocket 3D Model", modifier = Modifier.padding(8.dp))
+            Text(text = "Rocket 3D Model", modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
 
             ExposedDropdownMenuBox(
                 expanded = expanded,
-                onExpandedChange = { expanded = !expanded},
-                modifier = Modifier.padding(8.dp)
-                    .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(10.dp))
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier
+                    .padding(8.dp)
             ) {
                 TextField(
                     value = selectedModel.name,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Select Rocket") },
+                    label = { Text("Select Rocket", style = MaterialTheme.typography.titleSmall, color = Color(0xFF324B73)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                     modifier = Modifier
                         .menuAnchor()
-                        .background(Color(0xFFF0F0F0), RoundedCornerShape(10.dp)),
+                        .border(width = 2.dp, color = Color(0xE6324B73), shape = RoundedCornerShape(10.dp))
+                        .background(Color.Transparent, RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color(0xFFF0F0F0),
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent
+                        disabledIndicatorColor = Color.Transparent,
+                        focusedLabelColor = Color(0xE6324B73),
+                        unfocusedLabelColor = Color(0xE6324B73),
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
                     )
                 )
+
                 ExposedDropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onDismissRequest = { expanded = false },
+                    containerColor = Color(0xB3FFFFFF)
                 ) {
                     rocketList.forEach { model ->
                         DropdownMenuItem(
@@ -120,6 +128,7 @@ fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hilt
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(8.dp))
             ModelViewer(context = context, selectedModel)
@@ -196,7 +205,7 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
 
     modelInstance?.let { modelNode ->
         Scene(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().background(Color.Transparent),
             engine = engine,
             view = view,
             renderer = rememberRenderer(engine),

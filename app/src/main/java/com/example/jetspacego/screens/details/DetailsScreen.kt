@@ -2,6 +2,7 @@ package com.example.jetspacego.screens.details
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
@@ -21,9 +23,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +38,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,7 +77,9 @@ fun DetailsScreen(navController: NavController) {
     val result : Results? = navController.previousBackStackEntry?.savedStateHandle?.get<Results>("msn")
 
     Column {
-        TabRow(selectedTabIndex = selectedTab) {
+        TabRow(selectedTabIndex = selectedTab,
+            containerColor = Color.Transparent,
+            contentColor = Color.White){
             tabs.forEachIndexed { index, title ->
                 Tab(
                     text = { Text(title) },
@@ -111,30 +120,32 @@ fun OverviewTab(result: Results, navController: NavController) {
         Spacer(modifier = Modifier.height(8.dp))
         if(result.pad?.agencies?.size != 0) {
             if (result.pad?.agencies?.get(0)?.country?.size != 0) {
-                result.pad?.agencies?.get(0)?.country?.get(0)?.name?.let { Text(text = it, style = TextStyle(color = Color.Black, fontSize = 14.sp), modifier = Modifier.border(1.dp,
-                    Color.Gray, RoundedCornerShape(7.dp)).padding(4.dp)) }
+                result.pad?.agencies?.get(0)?.country?.get(0)?.name?.let { Text(text = it, style = TextStyle(color = Color.White, fontSize = 14.sp), modifier = Modifier.border(2.dp,
+                    Color(0xE6324B73), RoundedCornerShape(7.dp)).padding(6.dp)) }
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
         result.name?.let { Text(text = it, style = MaterialTheme.typography.titleLarge) }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         result.mission?.description?.let { Text(text = it, style = MaterialTheme.typography.bodyLarge) }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         AutoScrollingCarousel(list)
         Spacer(modifier = Modifier.height(20.dp))
         HorizontalDivider(modifier = Modifier.fillMaxWidth().height(1.dp))
 
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = "Type", style = TextStyle(color = Color.Gray, fontSize = 14.sp))
+        Text(text = "Type", style = MaterialTheme.typography.titleMedium, color = Color.White)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = "${result.launchServiceProvider?.type?.name}", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(20.dp))
-        Box(contentAlignment = Alignment.Center) {
-            OutlinedButton(onClick = {
+        Spacer(modifier = Modifier.height(20.dp).border(2.dp, Color(0xE6324B73)))
+        Box(contentAlignment = Alignment.Center,
+            modifier = Modifier.border(2.dp, Color(0xE6324B73), RoundedCornerShape(12.dp))) {
+            TextButton(onClick = {
                 navController.currentBackStackEntry?.savedStateHandle?.set("added msn", result)
                 navController.navigate("listBook")
-            }, shape = RoundedCornerShape(10.dp), modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Book a Space Flight", fontSize = 16.sp)
+            }, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().padding(6.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF07162D))) {
+                Text(text = "Book a Space Flight", fontSize = 18.sp)
             }
         }
 
@@ -143,51 +154,98 @@ fun OverviewTab(result: Results, navController: NavController) {
 
 @Composable
 fun AutoScrollingCarousel(items: List<MainViewORG>) {
-    val listState = rememberLazyListState()
+//    val listState = rememberLazyListState()
+//    LaunchedEffect(Unit) {
+//        while (true) {
+//            delay(2500L)
+//            val nextIndex = (listState.firstVisibleItemIndex + 1) % items.size
+//            listState.animateScrollToItem(nextIndex)
+//        }
+//    }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(2500L)
-            val nextIndex = (listState.firstVisibleItemIndex + 1) % items.size
-            listState.animateScrollToItem(nextIndex)
+//    LazyRow(
+//        state = listState,
+//        modifier = Modifier.fillMaxWidth(),
+//        contentPadding = PaddingValues(horizontal = 16.dp),
+//        horizontalArrangement = Arrangement.spacedBy(16.dp)
+//    ) {
+//        items(items.size) { index ->
+//            CarouselCard(item = items[index])
+//        }
+//    }
+
+
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = {items.size})
+
+    Column {
+        HorizontalPager(
+            state = pagerState,
+            contentPadding = PaddingValues(horizontal = 32.dp),
+            pageSpacing = 16.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(430.dp)
+        ) { page ->
+            CarouselCard(item = items[page])
         }
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        HorizontalPagerIndicator(pagerState = pagerState, pageCount = items.size)
     }
 
-    LazyRow(
-        state = listState,
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(items.size) { index ->
-            CarouselCard(item = items[index])
-        }
-    }
+
 }
 
 @Composable
 fun CarouselCard(item: MainViewORG) {
     Column(
         modifier = Modifier
-            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
-            .wrapContentHeight()
-            .width(300.dp)
+            .border(2.dp, Color(0xE6324B73), RoundedCornerShape(12.dp))
+            .height(430.dp).width(300.dp)
     ) {
-        item.image?.let { GlideImage(model = it,
+        item.image?.let { GlideImage(
+            model = it,
             contentDescription = null.toString(),
             contentScale = ContentScale.FillBounds,
-            modifier = Modifier.width(300.dp)
-                .height(400.dp)
-                .clip(shape = RoundedCornerShape(12.dp))) }
+            modifier = Modifier
+                .width(300.dp)
+                .height(380.dp)
+                .clip(shape = RoundedCornerShape(12.dp))
+        )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         item.name?.let {
             Text(
                 text = it,
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                modifier = Modifier.padding(10.dp),
+                modifier = Modifier.padding(4.dp),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+@Composable
+fun HorizontalPagerIndicator(pagerState: PagerState, pageCount: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        repeat(pageCount) { index ->
+            val selected = pagerState.currentPage == index
+            val color = if (selected) Color.White else Color.Gray
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(if (selected) 10.dp else 8.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(color)
             )
         }
     }
@@ -203,21 +261,21 @@ fun AgenciesTab(agencies: ArrayList<Agencies>) {
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(8.dp).wrapContentHeight(),
                     elevation = CardDefaults.cardElevation(4.dp),
-                    colors = CardDefaults.cardColors(Color.White)
+                    colors = CardDefaults.cardColors(Color(0xE6324B73))
                 ) {
                     Row {
                         GlideImageFun(agency.logo?.imageUrl, agency.name, ContentScale.Fit, Modifier.width(180.dp).height(180.dp))
 
                         Column(modifier = Modifier.padding(16.dp)) {
-                            agency.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium) }
+                            agency.name?.let { Text(text = it, style = MaterialTheme.typography.titleMedium, color = Color.White) }
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = "Administrator: ${agency.administrator}", style = MaterialTheme.typography.titleMedium)
+                            Text(text = "Administrator: ${agency.administrator}", style = MaterialTheme.typography.titleMedium, color = Color.White)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = "Founded: ${agency.foundingYear}")
+                            Text(text = "Founded: ${agency.foundingYear}", color = Color.White)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = "Launcher: ${agency.launchers}")
+                            Text(text = "Launcher: ${agency.launchers}", color = Color.White)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = "Type: ${agency.type?.name}")
+                            Text(text = "Type: ${agency.type?.name}", color = Color.White)
                         }
                     }
 
@@ -229,7 +287,7 @@ fun AgenciesTab(agencies: ArrayList<Agencies>) {
             Text(
                 text = "No Agencies",
                 modifier = Modifier.align(Alignment.Center),
-                color = Color.Black
+                color = Color.White
             )
         }
     }
@@ -264,7 +322,8 @@ fun MoreInfoTab(result: Results) {
         Box(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
             Text(
                 text = "No More Info",
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
+                color = Color.White
             )
         }
     }
