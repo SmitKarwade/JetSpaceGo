@@ -65,6 +65,7 @@ fun DisplayMission(navController: NavController, viewModel: SpaceViewModel = hil
     var selectedFilter by remember { mutableStateOf(MissionFilterType.ALL) }
     val nowIso = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
+
     val launchFlow = remember(selectedFilter) {
         when (selectedFilter) {
             MissionFilterType.ALL ->
@@ -79,13 +80,6 @@ fun DisplayMission(navController: NavController, viewModel: SpaceViewModel = hil
                 viewModel.getLaunchFlow(
                     windowEndBefore = nowIso,
                     ordering = "-net",
-                    searchQuery = name
-                )
-            MissionFilterType.NEXT ->
-                viewModel.getLaunchFlow(
-                    windowStartAfter = nowIso,
-                    ordering = "net",
-                    limit = 1,
                     searchQuery = name
                 )
         }
