@@ -8,7 +8,11 @@ import com.example.jetspacego.model.launches.Results
 import com.example.jetspacego.request.SpaceService
 
 class SpaceDataSource(
-    private val apiService: SpaceService,
+    private val api: SpaceService,
+    private val windowStartAfter: String?,
+    private val windowEndBefore: String?,
+    private val ordering: String,
+    private val limit: Int,
     private val searchQuery: String?
 ) : PagingSource<Int, Results>() {
 
@@ -17,7 +21,12 @@ class SpaceDataSource(
             Log.d("Paging", "Loading data with key: ${params.key}")
 
             val currentOffset = params.key ?: 0
-            val response = apiService.getMissions(limit = params.loadSize, offset = currentOffset, search = searchQuery)
+            val response = api.getMissions(ordering = ordering,
+                windowStartAfter = windowStartAfter,
+                windowEndBefore = windowEndBefore,
+                limit = limit,
+                offset = currentOffset,
+                search = searchQuery)
             Log.d("Paging", "Received ${response.results.size} items")
 
 

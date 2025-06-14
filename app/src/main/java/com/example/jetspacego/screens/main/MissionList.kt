@@ -1,9 +1,12 @@
 package com.example.jetspacego.screens.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,8 +18,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.example.jetspacego.model.MissionFilterType
 import com.example.jetspacego.model.launches.Results
 import com.example.jetspacego.paging.SpaceViewModel
 import kotlinx.coroutines.delay
@@ -52,73 +59,114 @@ fun MissionList(navController: NavController){
 @Composable
 fun DisplayMission(navController: NavController, viewModel: SpaceViewModel = hiltViewModel()) {
     val name = navController.previousBackStackEntry?.savedStateHandle?.get<String>("msn_name")
-    val missionFlow = remember(name) { viewModel.getLaunchFlow(name) }
-    val displayItems = missionFlow.collectAsLazyPagingItems()
+//    val missionFlow = remember(name) { viewModel.getLaunchFlow(name) }
+//    val displayItems = missionFlow.collectAsLazyPagingItems()
 
-    val isLoading = displayItems.loadState.refresh is androidx.paging.LoadState.Loading
-    val isError = displayItems.loadState.refresh is androidx.paging.LoadState.Error
-    val isEmpty = displayItems.itemCount == 0 && !isLoading && !isError
+    var selectedFilter by remember { mutableStateOf(MissionFilterType.ALL) }
+    val nowIso = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
-    if (isEmpty) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "No mission found", style = MaterialTheme.typography.titleMedium)
+    val launchFlow = remember(selectedFilter) {
+        when (selectedFilter) {
+            MissionFilterType.ALL ->
+                viewModel.getLaunchFlow(ordering = "-net", searchQuery = name)
+            MissionFilterType.UPCOMING ->
+                viewModel.getLaunchFlow(
+                    windowStartAfter = nowIso,
+                    ordering = "net",
+                    searchQuery = name
+                )
+            MissionFilterType.PAST ->
+                viewModel.getLaunchFlow(
+                    windowEndBefore = nowIso,
+                    ordering = "-net",
+                    searchQuery = name
+                )
+            MissionFilterType.NEXT ->
+                viewModel.getLaunchFlow(
+                    windowStartAfter = nowIso,
+                    ordering = "net",
+                    limit = 1,
+                    searchQuery = name
+                )
         }
-    } else {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(
-                count = displayItems.itemCount,
-                contentType = { index -> "missionContent" },
-                span = { index ->
-                    if (index == 0) GridItemSpan(2) else GridItemSpan(1)
-                }
-            ) { index ->
-                val mission = displayItems[index]
-                mission?.let {
-                    if (index == 0) {
-                        CountdownMissionCard(mission = it) {
-                            navController.currentBackStackEntry
-                                ?.savedStateHandle
-                                ?.set("msn", it)
-                            navController.navigate("details")
-                        }
-                    } else {
-                        MissionCard(mission = it) {
-                            navController.currentBackStackEntry
-                                ?.savedStateHandle
-                                ?.set("msn", it)
-                            navController.navigate("details")
-                        }
-                    }
-                }
+    }
+
+    val items = launchFlow.collectAsLazyPagingItems()
+
+    val isLoading = items.loadState.refresh is androidx.paging.LoadState.Loading
+    val isError = items.loadState.refresh is androidx.paging.LoadState.Error
+    val isEmpty = items.itemCount == 0 && !isLoading && !isError
+
+
+    Column {
+        MissionFilterChips(
+            selectedFilter = selectedFilter,
+            onFilterSelected = {
+                selectedFilter = it
             }
+        )
+
+        if (isEmpty) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(text = "No mission found", style = MaterialTheme.typography.titleMedium)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(
+                    count = items.itemCount,
+                    contentType = { index -> "missionContent" },
+                    span = { index ->
+                        if (index == 0) GridItemSpan(2) else GridItemSpan(1)
+                    }
+                ) { index ->
+                    val mission = items[index]
+                    mission?.let {
+                        if (index == 0) {
+                            CountdownMissionCard(mission = it) {
+                                navController.currentBackStackEntry
+                                    ?.savedStateHandle
+                                    ?.set("msn", it)
+                                navController.navigate("details")
+                            }
+                        } else {
+                            MissionCard(mission = it) {
+                                navController.currentBackStackEntry
+                                    ?.savedStateHandle
+                                    ?.set("msn", it)
+                                navController.navigate("details")
+                            }
+                        }
+                    }
+                }
 
 
 
-            displayItems.apply {
-                when {
-                    loadState.refresh is androidx.paging.LoadState.Loading -> {
-                        item(span = { GridItemSpan(2) }) {
-                            Text("Refreshing...", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                items.apply {
+                    when {
+                        loadState.refresh is androidx.paging.LoadState.Loading -> {
+                            item(span = { GridItemSpan(2) }) {
+                                Text("Refreshing...", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                            }
                         }
-                    }
-                    loadState.append is androidx.paging.LoadState.Loading -> {
-                        item(span = { GridItemSpan(2) }) {
-                            Text("Loading more...", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                        loadState.append is androidx.paging.LoadState.Loading -> {
+                            item(span = { GridItemSpan(2) }) {
+                                Text("Loading more...", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                            }
                         }
-                    }
-                    loadState.refresh is androidx.paging.LoadState.Error -> {
-                        val e = loadState.refresh as androidx.paging.LoadState.Error
-                        item(span = { GridItemSpan(2) }) {
-                            Text("Error refreshing: ${e.error.localizedMessage}", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                        loadState.refresh is androidx.paging.LoadState.Error -> {
+                            val e = loadState.refresh as androidx.paging.LoadState.Error
+                            item(span = { GridItemSpan(2) }) {
+                                Text("Error refreshing: ${e.error.localizedMessage}", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                            }
                         }
-                    }
-                    loadState.append is androidx.paging.LoadState.Error -> {
-                        val e = loadState.append as androidx.paging.LoadState.Error
-                        item(span = { GridItemSpan(2) }) {
-                            Text("Error loading more: ${e.error.localizedMessage}", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                        loadState.append is androidx.paging.LoadState.Error -> {
+                            val e = loadState.append as androidx.paging.LoadState.Error
+                            item(span = { GridItemSpan(2) }) {
+                                Text("Error loading more: ${e.error.localizedMessage}", modifier = Modifier.fillMaxWidth().padding(16.dp))
+                            }
                         }
                     }
                 }
@@ -202,6 +250,35 @@ fun MissionCard(mission: Results, onItemClick : () -> Unit) {
         }
     }
 }
+
+@Composable
+fun MissionFilterChips(
+    selectedFilter: MissionFilterType,
+    onFilterSelected: (MissionFilterType) -> Unit
+) {
+    Row(modifier = Modifier.padding(16.dp).wrapContentHeight(), verticalAlignment = Alignment.CenterVertically) {
+        Box(modifier = Modifier.background(Color(0xE6324B73), RoundedCornerShape(8.dp)).padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp)){
+            Text("Filter", modifier = Modifier.padding(4.dp))
+        }
+        VerticalDivider(modifier = Modifier.padding(start = 8.dp, end = 16.dp).height(30.dp), thickness = 2.dp, color = Color(0XB3FFFFFF))
+        MissionFilterType.values().forEach { filter ->
+            FilterChip(
+                selected = filter == selectedFilter,
+                onClick = { onFilterSelected(filter) },
+                label = { Text(filter.displayName) },
+                modifier = Modifier.padding(end = 8.dp),
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedLabelColor = Color.Black,
+                    labelColor = Color.White
+                ),
+                border = FilterChipDefaults.filterChipBorder(borderColor = Color(0xE6324B73), borderWidth = 2.dp, enabled = true, selected = false,
+                    selectedBorderColor = Color.White
+                )
+            )
+        }
+    }
+}
+
 
 
 fun getMissionStatus(net: String): String {

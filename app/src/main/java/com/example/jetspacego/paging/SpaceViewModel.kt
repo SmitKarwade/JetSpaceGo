@@ -14,15 +14,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SpaceViewModel @Inject constructor(private val apiService: SpaceService) : ViewModel(){
-    fun getLaunchFlow(searchQuery: String?): Flow<PagingData<Results>> {
-        return Pager(
-            config = PagingConfig(
-                pageSize = 10,
-                prefetchDistance = 2,
-                initialLoadSize = 10,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { SpaceDataSource(apiService, searchQuery) }
-        ).flow.cachedIn(viewModelScope)
+    fun getLaunchFlow(
+        searchQuery: String?,
+        windowStartAfter: String? = null,
+        windowEndBefore: String? = null,
+        ordering: String = "-net",
+        limit: Int = 11
+    ): Flow<PagingData<Results>> {
+        return Pager(PagingConfig(pageSize = limit)) {
+            SpaceDataSource(api = apiService, windowStartAfter = windowStartAfter, windowEndBefore = windowEndBefore, ordering = ordering, limit = limit, searchQuery = searchQuery)
+        }.flow.cachedIn(viewModelScope)
     }
+
 }
