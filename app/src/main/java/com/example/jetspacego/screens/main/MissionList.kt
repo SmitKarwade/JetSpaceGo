@@ -263,6 +263,7 @@ fun MissionFilterChips(
                 modifier = Modifier.padding(end = 8.dp),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedLabelColor = Color.Black,
+                    selectedContainerColor = Color.White,
                     labelColor = Color.White
                 ),
                 border = FilterChipDefaults.filterChipBorder(borderColor = Color(0xE6324B73), borderWidth = 2.dp, enabled = true, selected = false,

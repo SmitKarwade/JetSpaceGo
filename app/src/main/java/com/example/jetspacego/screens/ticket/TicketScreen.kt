@@ -95,7 +95,11 @@ fun TicketScreen(navController: NavController, viewModel: RocketViewModel = hilt
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                     modifier = Modifier
                         .menuAnchor()
-                        .border(width = 2.dp, color = Color(0xE6324B73), shape = RoundedCornerShape(10.dp))
+                        .border(
+                            width = 2.dp,
+                            color = Color(0xE6324B73),
+                            shape = RoundedCornerShape(10.dp)
+                        )
                         .background(Color.Transparent, RoundedCornerShape(10.dp)),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.colors(
@@ -205,7 +209,9 @@ fun ModelViewer(context: Context, rocketModelURL: RocketModel) {
 
     modelInstance?.let { modelNode ->
         Scene(
-            modifier = Modifier.fillMaxSize().background(Color.Transparent),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent),
             engine = engine,
             view = view,
             renderer = rememberRenderer(engine),
