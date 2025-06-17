@@ -11,37 +11,37 @@ val rocketList = listOf(
     RocketModel(
         id = 1,
         name = "PSLV (Polar Satellite Launch Vehicle)",
-        description = "An Indian launch vehicle developed by ISRO, used for launching satellites into polar orbits.",
+        description = "ISRO's most reliable launcher • 4-stage design (solid-liquid-solid-liquid) • Used for polar/Sun-synchronous orbits • Carries up to 1,750 kg to SSO",
         url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/rocket_anim.glb"
     ),
     RocketModel(
         id = 2,
         name = "GSLV (Geosynchronous Satellite Launch Vehicle)",
-        description = "India’s heavy-lift launch vehicle designed to place large payloads into geostationary orbits.",
-        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/gslv_mk3.glb"
+        description = "India’s heavy-lifter • Cryogenic upper stage • Used for communication satellites • Up to 2,500 kg to GTO • Three-stage launch system",
+        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/gslv.glb"
     ),
     RocketModel(
         id = 3,
         name = "Falcon 9",
-        description = "A reusable two-stage rocket designed and manufactured by SpaceX for satellite and cargo missions.",
+        description = "SpaceX’s reusable rocket • Two-stage, Merlin engines • Launches Starlink, ISS cargo • Lands booster on droneships • Payload: up to 22,800 kg to LEO",
         url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/falcon_9_-_spacex.glb"
     ),
     RocketModel(
         id = 4,
         name = "Mercury Atlas",
-        description = "A launch vehicle used by NASA in the Mercury program to send astronauts into orbit.",
-        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/atlas_lv-3b_mercury.glb"
+        description = "Used by NASA for Mercury missions • First to orbit an American • Based on Atlas-D missile • 1-stage with boosters • John Glenn's launch vehicle",
+        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/mercury_atlas.glb"
     ),
     RocketModel(
         id = 5,
         name = "Mercury Redstone",
-        description = "A smaller launch vehicle used to launch the first American astronauts into space in suborbital flights.",
-        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/mercury-_redstone_launch_vehicle.glb"
+        description = "Short suborbital flights • Alan Shepard's historic launch • Based on Redstone missile • Single-stage liquid-fueled • Max altitude ~190 km",
+        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/mercury_redstone.glb"
     ),
     RocketModel(
         id = 6,
         name = "SLS (Space Launch System)",
-        description = "NASA’s next-generation super heavy-lift rocket designed for deep space missions like Artemis.",
-        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/space_launch_system_sls.glb"
+        description = "NASA’s super heavy-lift rocket • Supports Artemis Moon missions • Solid rocket boosters + RS-25 core • Payload: up to 95,000 kg to LEO",
+        url = "https://raw.githubusercontent.com/SmitKarwade/Rocket3d/main/sls.glb"
     )
 )

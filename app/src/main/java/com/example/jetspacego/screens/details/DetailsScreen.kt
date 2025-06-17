@@ -29,6 +29,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -306,20 +307,55 @@ fun GlideImageFun(model: Any?, contentDescription: String?, contentScale: Conten
 
 @Composable
 fun MoreInfoTab(result: Results) {
-    if (result.mission?.agencies?.size != 0) {
-        Column(modifier = Modifier.padding(16.dp)) {
-
+    val context = LocalContext.current
+    if (!result.mission?.agencies.isNullOrEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp), verticalArrangement = Arrangement.Bottom
+        ) {
             Spacer(modifier = Modifier.height(8.dp))
-            result.mission?.agencies?.get(0)?.wikiUrl?.let { url ->
-                ClickableLink(text = "Wikipedia", url = url)
-            }
 
-            result.mission?.agencies?.get(0)?.infoUrl?.let { url ->
-                ClickableLink(text = "Official page", url = url)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                result.mission?.agencies?.get(0)?.wikiUrl?.let { url ->
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                    ) {
+                        Text(text = "Wikipedia", color = Color.Black)
+                    }
+                }
+
+                result.mission?.agencies?.get(0)?.infoUrl?.let { url ->
+                    Button(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xE6324B73))
+                    ) {
+                        Text(text = "Official Page")
+                    }
+                }
             }
         }
     } else {
-        Box(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
             Text(
                 text = "No More Info",
                 modifier = Modifier.align(Alignment.Center),
@@ -329,24 +365,7 @@ fun MoreInfoTab(result: Results) {
     }
 }
 
-@Composable
-fun ClickableLink(text: String, url: String) {
-    val context = LocalContext.current
 
-    Text(
-        text = buildAnnotatedString {
-            append(text)
-        },
-        modifier = Modifier
-            .clickable {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                context.startActivity(intent)
-            }
-            .padding(4.dp),
-        textDecoration = TextDecoration.Underline,
-        color = Color(0xFF3F51B5)
-    )
-}
 
 
 

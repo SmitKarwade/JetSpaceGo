@@ -75,7 +75,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         //enableEdgeToEdge()
         setContent {
-            SystemBarColorHandler()
             MainUI()
         }
     }
@@ -265,40 +264,6 @@ fun MissionCard(org: OrgView, onItemClick : () -> Unit) {
                 )
             }
         }
-    }
-}
-
-
-@SuppressLint("ContextCastToActivity")
-@Composable
-fun SystemBarColorHandler() {
-    val statusBarLight = Color.Green
-    val statusBarDark = Color.Blue
-    val navigationBarLight = Color.Green
-    val navigationBarDark = Color.Blue
-    val isDarkMode = isSystemInDarkTheme()
-    val context = LocalContext.current as ComponentActivity
-
-    DisposableEffect(isDarkMode) {
-        context.enableEdgeToEdge(
-            statusBarStyle = if (!isDarkMode) {
-                SystemBarStyle.light(
-                    statusBarLight.toArgb(),
-                    statusBarDark.toArgb()
-                )
-            } else {
-                SystemBarStyle.dark(statusBarDark.toArgb())
-            },
-            navigationBarStyle = if (!isDarkMode) {
-                SystemBarStyle.light(
-                    navigationBarLight.toArgb(),
-                    navigationBarDark.toArgb()
-                )
-            } else {
-                SystemBarStyle.dark(navigationBarDark.toArgb())
-            }
-        )
-        onDispose {}
     }
 }
 
