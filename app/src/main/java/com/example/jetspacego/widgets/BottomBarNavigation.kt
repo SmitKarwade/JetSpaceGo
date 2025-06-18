@@ -19,7 +19,7 @@ import com.example.jetspacego.R
 
 @Composable
 fun BottomBar(navController: NavController) {
-    val items = listOf("Home", "Ticket", "Profile")
+    val items = listOf("Home", "Rockets", "Profile")
     val routes = listOf("main", "ticket", "profile")
 
     var currentRoute = navController.currentDestination?.route
@@ -47,13 +47,13 @@ fun BottomBar(navController: NavController) {
                 icon = {
                     when (index) {
                         0 -> Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.rocket),
+                            imageVector = ImageVector.vectorResource(R.drawable.housedarkvector),
                             contentDescription = "Home"
                         )
 
                         1 -> Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ticket),
-                            contentDescription = "Ticket"
+                            imageVector = ImageVector.vectorResource(R.drawable.rocket),
+                            contentDescription = "Rockets"
                         )
 
                         2 -> Icon(
